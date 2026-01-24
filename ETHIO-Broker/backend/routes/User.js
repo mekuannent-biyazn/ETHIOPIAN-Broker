@@ -28,7 +28,10 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const fieldPrefix = file.fieldname; // idPhotoFront, idPhotoBack, or selfiePhoto
-    cb(null, fieldPrefix + "-" + uniqueSuffix + path.extname(file.originalname));
+    cb(
+      null,
+      fieldPrefix + "-" + uniqueSuffix + path.extname(file.originalname),
+    );
   },
 });
 
@@ -54,38 +57,38 @@ router.post(
   "/register",
   authLimiter,
   upload.fields([
-    { name: 'idPhotoFront', maxCount: 1 },
-    { name: 'idPhotoBack', maxCount: 1 },
-    { name: 'selfiePhoto', maxCount: 1 }
+    { name: "idPhotoFront", maxCount: 1 },
+    { name: "idPhotoBack", maxCount: 1 },
+    { name: "selfiePhoto", maxCount: 1 },
   ]),
   validationMiddleware.validateRegistration,
-  registerUser
+  registerUser,
 );
 router.post(
   "/login",
   authLimiter,
   validationMiddleware.validateLogin,
-  loginUser
+  loginUser,
 );
 router.post("/verify-email", verifyEmail);
 router.post(
   "/resend-verification",
   validationMiddleware.validateEmail,
-  resendVerificationEmail
+  resendVerificationEmail,
 ); // To resend verification email
 
 // public
 router.post(
   "/forgot-password",
   validationMiddleware.validateEmail,
-  forgotPassword
+  forgotPassword,
 );
 router.post("/reset-password", resetPassword);
 router.put(
   "/profile",
   protect,
   validationMiddleware.validateProfileUpdate,
-  updateUserById
+  updateUserById,
 );
 
 router.get("/available", protect, getAvailableUsers);

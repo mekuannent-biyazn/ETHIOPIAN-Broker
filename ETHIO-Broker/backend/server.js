@@ -12,9 +12,18 @@ const { scheduleCron } = require("./utils/cronJobs");
 const app = require("./app");
 
 const server = http.createServer(app);
+// const io = socketIo(server, {
+//   cors: {
+//     origin: process.env.FRONTEND_URL || "http://localhost:3000",
+//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+//     credentials: true,
+//   },
+// });
+const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:3000"];
+
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   },
@@ -23,7 +32,7 @@ const io = socketIo(server, {
 // Socket.io authentication middleware
 io.use((socket, next) => {
   try {
-    const token = socket.handshake.auth.token;
+    const token = socket.handshake.auth?.token;
     if (!token) {
       return next(new Error("Authentication error: No token provided"));
     }
@@ -47,18 +56,18 @@ io.on("connection", async (socket) => {
 
     // Update user online status
     try {
-      const User = require('./models/userModel');
+      const User = require("./models/userModel");
       await User.findByIdAndUpdate(socket.userId, {
         isOnline: true,
         lastSeen: new Date(),
-        socketId: socket.id
+        socketId: socket.id,
       });
 
       // Broadcast online status to all users
       socket.broadcast.emit("user-status-changed", {
         userId: socket.userId,
         isOnline: true,
-        lastSeen: new Date()
+        lastSeen: new Date(),
       });
 
       console.log(`🟢 User ${socket.userId} is now online`);
@@ -69,20 +78,30 @@ io.on("connection", async (socket) => {
 
   // Handle typing events with improved responsiveness
   socket.on("start-typing", (data) => {
-    console.log("⌨️ Typing started from:", socket.userId, "to:", data.receiverId);
+    console.log(
+      "⌨️ Typing started from:",
+      socket.userId,
+      "to:",
+      data.receiverId,
+    );
     socket.to(data.receiverId).emit("user-typing", {
       userId: socket.userId,
       isTyping: true,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   });
 
   socket.on("stop-typing", (data) => {
-    console.log("⌨️ Typing stopped from:", socket.userId, "to:", data.receiverId);
+    console.log(
+      "⌨️ Typing stopped from:",
+      socket.userId,
+      "to:",
+      data.receiverId,
+    );
     socket.to(data.receiverId).emit("user-typing", {
       userId: socket.userId,
       isTyping: false,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   });
 
@@ -95,20 +114,20 @@ io.on("connection", async (socket) => {
 
     // Mark message as delivered if receiver is online
     try {
-      const Message = require('./models/Message');
-      const User = require('./models/userModel');
+      const Message = require("./models/Message");
+      const User = require("./models/userModel");
 
       const receiver = await User.findById(data.receiverId);
       if (receiver && receiver.isOnline) {
         await Message.findByIdAndUpdate(data._id, {
           messageStatus: "delivered",
-          deliveredAt: new Date()
+          deliveredAt: new Date(),
         });
 
         // Notify sender about delivery
         socket.emit("message-delivered", {
           messageId: data._id,
-          deliveredAt: new Date()
+          deliveredAt: new Date(),
         });
       }
     } catch (error) {
@@ -119,16 +138,16 @@ io.on("connection", async (socket) => {
   // Handle message delivery confirmation
   socket.on("message-delivered", async (data) => {
     try {
-      const Message = require('./models/Message');
+      const Message = require("./models/Message");
       await Message.findByIdAndUpdate(data.messageId, {
         messageStatus: "delivered",
-        deliveredAt: new Date()
+        deliveredAt: new Date(),
       });
 
       // Notify sender
       socket.to(data.senderId).emit("message-delivered", {
         messageId: data.messageId,
-        deliveredAt: new Date()
+        deliveredAt: new Date(),
       });
     } catch (error) {
       console.error("Error confirming message delivery:", error);
@@ -138,17 +157,17 @@ io.on("connection", async (socket) => {
   // Handle message read confirmation
   socket.on("message-read", async (data) => {
     try {
-      const Message = require('./models/Message');
+      const Message = require("./models/Message");
       await Message.findByIdAndUpdate(data.messageId, {
         messageStatus: "read",
         isRead: true,
-        readAt: new Date()
+        readAt: new Date(),
       });
 
       // Notify sender
       socket.to(data.senderId).emit("message-read", {
         messageId: data.messageId,
-        readAt: new Date()
+        readAt: new Date(),
       });
     } catch (error) {
       console.error("Error confirming message read:", error);
@@ -176,18 +195,18 @@ io.on("connection", async (socket) => {
 
     if (socket.userId) {
       try {
-        const User = require('./models/userModel');
+        const User = require("./models/userModel");
         await User.findByIdAndUpdate(socket.userId, {
           isOnline: false,
           lastSeen: new Date(),
-          socketId: null
+          socketId: null,
         });
 
         // Broadcast offline status
         socket.broadcast.emit("user-status-changed", {
           userId: socket.userId,
           isOnline: false,
-          lastSeen: new Date()
+          lastSeen: new Date(),
         });
 
         console.log(`🔴 User ${socket.userId} is now offline`);
@@ -214,9 +233,6 @@ const PORT = process.env.PORT || 9000;
 
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📡 Socket.io ready at http://localhost:${PORT}`);
-      console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:3000"}`);
-      console.log(`📧 Email configured: ${process.env.SMTP_EMAIL_USER ? "Yes" : "No"}`);
     });
   } catch (error) {
     console.error(`❌ Failed to start server: ${error.message}`);
