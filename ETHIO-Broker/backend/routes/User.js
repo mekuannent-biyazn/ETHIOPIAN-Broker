@@ -15,7 +15,7 @@ const {
   getAllBrokers,
 } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
-const { authLimiter } = require("../middleware/rateLimiteMiddleware");
+const { authLimiter } = require("../middleware/rateLimitMiddleware");
 const validationMiddleware = require("../middleware/validationMiddleware");
 
 const router = express.Router();
