@@ -1,9 +1,10 @@
-
-
 import axios from "axios";
 
 // ✅ KEEP: Your existing base URL without /api
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:9000";
+const BASE_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_API_URL || "https://ethiopian-broker.onrender.com"
+    : "http://localhost:9000";
 
 const instance = axios.create({
   baseURL: BASE_URL,
@@ -27,7 +28,7 @@ instance.interceptors.request.use(
         data: config.data,
         hasToken: !!token,
         headers: config.headers,
-      }
+      },
     );
 
     return config;
@@ -35,7 +36,7 @@ instance.interceptors.request.use(
   (error) => {
     console.error("❌ Request interceptor error:", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor with enhanced error handling
@@ -53,7 +54,7 @@ instance.interceptors.response.use(
         status: error.response?.status,
         data: error.response?.data,
         message: error.message,
-      }
+      },
     );
 
     // Handle specific error cases
@@ -79,10 +80,14 @@ instance.interceptors.response.use(
       }, 2000);
     }
 
-    if (error.response?.status === 403 && error.response?.data?.message?.includes("deactivated")) {
+    if (
+      error.response?.status === 403 &&
+      error.response?.data?.message?.includes("deactivated")
+    ) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      error.message = "Your account has been deactivated. Please contact the administrator.";
+      error.message =
+        "Your account has been deactivated. Please contact the administrator.";
       // Optional: Redirect to login page after a delay
       setTimeout(() => {
         window.location.href = "/login";
@@ -107,7 +112,7 @@ instance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default instance;
