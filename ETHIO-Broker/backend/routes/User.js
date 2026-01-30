@@ -14,7 +14,7 @@ const {
   getAvailableUsers,
   getAllBrokers,
 } = require("../controllers/userController");
-const { protect } = require("../middleware/authMIddleware");
+const { protect } = require("../middleware/authMlddleware");
 const { authLimiter } = require("../middleware/rateLimiteMiddleware");
 const validationMiddleware = require("../middleware/validationMiddleware");
 
