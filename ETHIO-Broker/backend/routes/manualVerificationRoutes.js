@@ -5,7 +5,7 @@ const {
   getVerificationFormData,
   adminVerifyPayment
 } = require("../controllers/manualVerificationController");
-const { protect } = require("../middleware/authMIddleware");
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
