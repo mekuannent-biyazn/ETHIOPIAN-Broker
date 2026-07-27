@@ -235,7 +235,7 @@ const PORT = process.env.PORT || 9000;
     console.log("   Chapa API Key configured:", !!process.env.CHAPA_SECRET_KEY);
     console.log(
       "   Frontend URL:",
-      process.env.FRONTEND_URL || "http://localhost:3000",
+      process.env.CLIENT_URL || "http://localhost:3000",
     );
     console.log("\n");
 
