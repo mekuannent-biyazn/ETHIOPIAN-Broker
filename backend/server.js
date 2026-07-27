@@ -12,14 +12,10 @@ const { scheduleCron } = require("./utils/cronJobs");
 const app = require("./app");
 
 const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    credentials: true,
-  },
-});
-const allowedOrigins = [process.env.CLIENT_URL || "http://localhost:3000"];
+
+const allowedOrigins = ["http://localhost:3000", process.env.CLIENT_URL].filter(
+  Boolean,
+);
 
 const io = socketIo(server, {
   cors: {
