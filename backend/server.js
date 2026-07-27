@@ -19,7 +19,7 @@ const server = http.createServer(app);
 //     credentials: true,
 //   },
 // });
-const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:3000"];
+const allowedOrigins = [process.env.CLIENT_URL, "http://localhost:3000"];
 
 const io = socketIo(server, {
   cors: {
