@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 // CORS configuration
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL || "http://localhost:3000","https://ethiopian-broker.vercel.app"],
+    origin: [process.env.CLIENT_URL || "http://localhost:3000"],
     credentials: true,
   }),
 );
